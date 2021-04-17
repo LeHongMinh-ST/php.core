@@ -15,10 +15,12 @@ class Auth
 
     public function __construct($guard)
     {
-        $this->guard = $guard;
+        if (isset($guard)){
+            $this->guard = $guard;
+        }
     }
 
-    public static function guard($guard)
+    public static function guard($guard = null)
     {
         return new self($guard);
     }
