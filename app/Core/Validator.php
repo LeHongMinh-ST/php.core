@@ -75,10 +75,10 @@ class Validator
                         $checkValid = $this->validateDate($data, $name, $rule, $message['date'] ?? '', $attributes);
                         break;
                     case 'max':
-                        $checkValid = $this->validateDate($data, $name, $rule, $message['date'] ?? '', $attributes);
+                        $checkValid = $this->validateMax($data, $name, $rule, $message['max'] ?? '', $attributes, $value);
                         break;
                     case 'min':
-                        $checkValid = $this->validateDate($data, $name, $rule, $message['date'] ?? '', $attributes);
+                        $checkValid = $this->validateMin($data, $name, $rule, $message['mix'] ?? '', $attributes, $value);
                         break;
                 }
 
@@ -177,6 +177,48 @@ class Validator
         }
         return true;
     }
+
+    private function validateMax(array $data, string $name, string $rule, string $message, array $attributes, $value): bool
+    {
+
+        $type = gettype($data[$name]);
+        switch ($type) {
+            case 'string':
+            case 'array':
+                if ((count($data[$name]) > (int)$value)) {
+                    return $this->extracted($name, $rule . $value, $attributes, $message);
+                }
+                break;
+            case 'integer':
+                if ((int)$data[$name] > (int)$value) {
+                    return $this->extracted($name, $rule . 'number', $attributes, $message);
+                }
+                break;
+        }
+
+        return true;
+    }
+
+    private function validateMin(array $data, string $name, string $rule, string $message, array $attributes, $value): bool
+    {
+        $type = gettype($data[$name]);
+        switch ($type) {
+            case 'string':
+            case 'array':
+                if ((count($data[$name]) < (int)$value)) {
+                    return $this->extracted($name, $rule . $value, $attributes, $message);
+                }
+                break;
+            case 'integer':
+                if ((int)$data[$name] < (int)$value) {
+                    return $this->extracted($name, $rule . 'number', $attributes, $message);
+                }
+                break;
+        }
+
+        return true;
+    }
+
 
     /**
      * @param string $name
