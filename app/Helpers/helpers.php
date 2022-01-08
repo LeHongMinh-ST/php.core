@@ -10,6 +10,7 @@ if (!function_exists('dd')) {
         die();
     }
 }
+
 if (!function_exists('asset')) {
     function asset($data)
     {
@@ -19,9 +20,25 @@ if (!function_exists('asset')) {
     }
 }
 
+if (!function_exists('config')) {
+    function config($data)
+    {
+        dd($data);
+        return include('app/config/' . $data . '.php');
+    }
+}
+
+if (!function_exists('lang')) {
+    function lang($data)
+    {
+        return include('app/resource/lang/' . $data . '.php');
+    }
+}
+
 if (!function_exists('route')) {
     function route($name, $param = null)
     {
+
         // Lặp qua các route trong ứng dụng, kiểm tra có chứa url được gọi không
         foreach (\App\Core\Route::getRoute() as $route) {
 
@@ -30,9 +47,13 @@ if (!function_exists('route')) {
                 $url = str_replace('\/', '/', $url);
 
                 $arrayURL = explode('/', $url);
-                if (!is_array($param)) {
-                    $param = explode("", $param);
+
+                if ($param) {
+                    if (!is_array($param)) {
+                        $param = explode("", $param);
+                    }
                 }
+
 
                 foreach ($arrayURL as $key => $value) {
                     if ($value == '(.+)') {
@@ -56,3 +77,4 @@ function json($data)
     $json =  json_encode($data,true);
     die($json);
 }
+

@@ -37,8 +37,9 @@ class Auth
                 if ($auth->where($array)->exists()) {
                     $data = $auth->where($array)->first();
                     Session::push('auth', [
-                        $guard => $data
+                        $this->guard => $data
                     ]);
+
                     return true;
                 }
                 return false;
@@ -66,20 +67,19 @@ class Auth
         return false;
     }
 
-    public function logout($guard)
+    public static function logout($guard = null)
     {
         if (empty($guard)) {
-            return Session::forget('auth');
+            Session::forget('auth');
+            return;
         }
 
         if (Session::has('auth')) {
             $auth = Session::get('auth');
-            if (array_key_exists($guard)) {
+            if (array_key_exists($guard, $auth)) {
                 unset(Session::get('auth')[$guard]);
             }
-            return false;
         }
-        return false;
     }
 
     public function user()

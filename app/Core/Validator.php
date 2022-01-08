@@ -4,7 +4,7 @@ namespace App\Core;
 
 class Validator
 {
-    protected $rule = [];
+    protected $rules = [];
 
     protected $messages = [];
 
@@ -19,66 +19,77 @@ class Validator
         return $this->errors;
     }
 
-
     public function isValid(): bool
     {
         return $this->isValid;
     }
 
-    public function make(array $data, array $rules, array $message = [], array $attributes = [])
+    public function make(array $data, array $rules = null, array $messages = null, array $attributes = null)
     {
+        if (!$rules) {
+            $rules = $this->rules;
+        }
+
+        if (!$messages) {
+            $messages = $this->messages;
+        }
+
+        if (!$attributes) {
+            $attributes = $this->attributes;
+        }
+
         foreach ($rules as $name => $value) {
             $arrayRule = $value;
             if (gettype($value) == 'string') {
                 $arrayRule = explode('|', $arrayRule);
             }
 
-            foreach ($arrayRule as $key => $value) {
-                if (is_callable($value)) {
-                    $this->isValid = call_user_func_array($value, [$name, $data]);
-                    return $this->extracted($name, $key, $attributes, $message[$key] ?? '');
+            foreach ($arrayRule as $key => $valueRule) {
+                if (is_callable($valueRule)) {
+                    $this->isValid = call_user_func_array($valueRule, [$name, $data]);
+                    return $this->extracted($name, $key, $attributes, $messages[$key] ?? '');
                 }
 
-                $arrayValue = explode(':', $value);
+                $arrayValue = explode(':', $valueRule);
                 $rule = $arrayValue[0];
 
-                $value = $arrayValue[1] ?? null;
+                $val = $arrayValue[1] ?? null;
 
                 $checkValid = true;
 
                 switch ($rule) {
                     case 'required':
-                        $checkValid = $this->validateRequired($data, $name, $rule, $message['required'] ?? '', $attributes);
+                        $checkValid = $this->validateRequired($data, $name, $rule, $messages['required'] ?? '', $attributes);
                         break;
                     case 'string':
-                        $checkValid = $this->validateString($data, $name, $rule, $message['string'] ?? '', $attributes);
+                        $checkValid = $this->validateString($data, $name, $rule, $messages['string'] ?? '', $attributes);
                         break;
                     case 'email':
-                        $checkValid = $this->validateEmail($data, $name, $rule, $message['email'] ?? '', $attributes);
+                        $checkValid = $this->validateEmail($data, $name, $rule, $messages['email'] ?? '', $attributes);
                         break;
                     case 'array':
-                        $checkValid = $this->validateArray($data, $name, $rule, $message['array'] ?? '', $attributes);
+                        $checkValid = $this->validateArray($data, $name, $rule, $messages['array'] ?? '', $attributes);
                         break;
                     case 'integer':
-                        $checkValid = $this->validateInteger($data, $name, $rule, $message['integer'] ?? '', $attributes);
+                        $checkValid = $this->validateInteger($data, $name, $rule, $messages['integer'] ?? '', $attributes);
                         break;
                     case 'boolean':
-                        $checkValid = $this->validateBoolean($data, $name, $rule, $message['boolean'] ?? '', $attributes);
+                        $checkValid = $this->validateBoolean($data, $name, $rule, $messages['boolean'] ?? '', $attributes);
                         break;
                     case 'url':
-                        $checkValid = $this->validateUrl($data, $name, $rule, $message['url'] ?? '', $attributes);
+                        $checkValid = $this->validateUrl($data, $name, $rule, $messages['url'] ?? '', $attributes);
                         break;
                     case 'confirmed':
-                        $checkValid = $this->validateConfirmed($data, $name, $rule, $message['confirmed'] ?? '', $attributes);
+                        $checkValid = $this->validateConfirmed($data, $name, $rule, $messages['confirmed'] ?? '', $attributes);
                         break;
                     case 'date':
-                        $checkValid = $this->validateDate($data, $name, $rule, $message['date'] ?? '', $attributes);
+                        $checkValid = $this->validateDate($data, $name, $rule, $messages['date'] ?? '', $attributes);
                         break;
                     case 'max':
-                        $checkValid = $this->validateMax($data, $name, $rule, $message['max'] ?? '', $attributes, $value);
+                        $checkValid = $this->validateMax($data, $name, $rule, $messages['max'] ?? '', $attributes, $val);
                         break;
                     case 'min':
-                        $checkValid = $this->validateMin($data, $name, $rule, $message['mix'] ?? '', $attributes, $value);
+                        $checkValid = $this->validateMin($data, $name, $rule, $messages['mix'] ?? '', $attributes, $val);
                         break;
                 }
 
@@ -127,8 +138,7 @@ class Validator
 
     private function validateRequired(array $data, string $name, string $rule, string $message, array $attributes): bool
     {
-
-        if (!isset($data[$name])) {
+        if (!isset($data[$name]) || $data[$name] == '') {
             return $this->extracted($name, $rule, $attributes, $message);
         }
 
@@ -229,13 +239,13 @@ class Validator
     private function extracted(string $name, string $rule, array $attributes, string $message = ''): bool
     {
         $this->isValid = false;
-        $erors = include('app/resource/lang/validate.php');
+        $errors = lang('validate');
         $key = $name;
 
         if (array_key_exists($name, $attributes)) {
             $key = $attributes[$name];
         }
-        $mes = str_replace(':attribute', $key, $erors[$rule] ?? '');
+        $mes = str_replace(':attribute', $key, $errors[$rule] ?? '');
         if ($message) {
             $mes = str_replace(':attribute', $key, $message);
         }

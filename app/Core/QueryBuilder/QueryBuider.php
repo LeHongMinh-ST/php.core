@@ -551,7 +551,8 @@ class QueryBuider
                 $value = $where['value'];
                 $type = $where['type'];
 
-                $query .= " $column $operator $value";
+                $query .= " $column $operator '$value'";
+
                 if ($key < count($this->wheres) - 1) {
                     $query .= ($type === 'and') ? " AND" : " OR";
                 }
@@ -629,6 +630,15 @@ class QueryBuider
     public function beginTransaction()
     {
         $this->conn->beginTransaction();
+    }
+
+    public function exists(): bool
+    {
+        $data = $this->first();
+        if ($data) {
+            return true;
+        }
+        return false;
     }
 
     public function pagination($limit = 10, $page = 1)

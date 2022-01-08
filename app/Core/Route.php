@@ -128,7 +128,7 @@ class Route
             'url' => $url,
             'name' => $name == '' ? $url : $name,
             'method' => $method,
-            'action' => is_callable($action) ? $action : static::$prefix . $action,
+            'action' => $action ,
             'params' => $params[2],
             'middleware' => static::$middleware,
             'prefix' => static::$prefix
@@ -159,6 +159,7 @@ class Route
                     if ($route['middleware']) {
                         Middleware::check($route['middleware']);
                     }
+
                     self::call_action_route($route['action'], $arrayParams);
                     return;
                 }
