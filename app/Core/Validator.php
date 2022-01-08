@@ -35,7 +35,7 @@ class Validator
 
             foreach ($arrayRule as $key => $value) {
                 if (is_callable($value)) {
-                    $this->isValid = call_user_func_array($value, [$name, $data[$name] ?? null]);
+                    $this->isValid = call_user_func_array($value, [$name, $data]);
                     return $this->extracted($name, $key, $attributes, $message[$key] ?? '');
                 }
 
