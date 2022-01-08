@@ -6,6 +6,7 @@ namespace App\Core\Session;
 
 class Session
 {
+
     public static function push($key, $value)
     {
         $_SESSION[$key] = $value;

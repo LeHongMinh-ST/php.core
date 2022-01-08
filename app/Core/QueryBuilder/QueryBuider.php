@@ -32,11 +32,15 @@ class QueryBuider
 
     private $total;
 
+    private $conn;
+
 
     public function __construct()
     {
         $arguments = func_get_args();
         $numberOfArguments = func_num_args();
+
+        $this->conn = new Connection();
 
         if (method_exists($this, $function = '__construct' . $numberOfArguments)) {
             call_user_func_array(array($this, $function), $arguments);
@@ -602,8 +606,7 @@ class QueryBuider
 
     public function get()
     {
-        $conn = new Connection();
-        $result = $conn->getData($this->queryData());
+        $result = $this->conn->getData($this->queryData());
         $data = [];
 
         while ($obj = $result->fetch()) {
@@ -611,6 +614,21 @@ class QueryBuider
         }
 
         return $data;
+    }
+
+    public function commit()
+    {
+        $this->conn->commit();
+    }
+
+    public function rollback()
+    {
+        $this->conn->rollback();
+    }
+
+    public function beginTransaction()
+    {
+        $this->conn->beginTransaction();
     }
 
     public function pagination($limit = 10, $page = 1)

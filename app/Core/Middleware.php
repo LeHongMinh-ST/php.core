@@ -14,9 +14,12 @@ class Middleware
 
     public static function check($middleware)
     {
-        if (array_key_exists($middleware,static::$routeMiddleware)){
-           $middleware = new static::$routeMiddleware[$middleware];
-           $middleware->handle();
+        $middlewares = explode('|', $middleware);
+        foreach ($middlewares as $mid) {
+            if (array_key_exists($mid,static::$routeMiddleware)){
+                $mid = new static::$routeMiddleware[$mid];
+                $mid->handle();
+            }
         }
     }
 }

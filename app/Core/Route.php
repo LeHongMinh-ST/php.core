@@ -36,15 +36,13 @@ class Route
      * @param string $url URL cần so khớp
      * @param string|callable $action Hành động khi URL được gọi. Có thể là một callback hoặc một method trong controller
      *
-     * @return void
+     * @return array
      *
      */
     public static function get($url, $action, $name = '')
     {
         // Xử lý phương thức GET
         self::request($url, 'GET', $action, $name);
-
-        return self::$routes;
     }
 
     /**
@@ -61,6 +59,7 @@ class Route
     {
         // Xử lý phương thức POST
         self::request($url, 'POST', $action, $name);
+
     }
 
 
@@ -93,7 +92,7 @@ class Route
      */
     public static function prefix($prefix, $callback)
     {
-        static::$prefix = $prefix . '\\';
+        static::$prefix .= '/' . $prefix;
         call_user_func($callback);
         static::$prefix = '';
     }
@@ -112,6 +111,8 @@ class Route
      */
     private static function request($url, $method, $action, $name)
     {
+        if (static::$prefix != '')
+            $url = static::$prefix . $url;
         // kiểm tra xem URL có chứa param không. VD: post/{id}
         if (preg_match_all('/({([a-zA-Z]+)})/', $url, $params)) {
             // thay thế param bằng (.+). VD: post/{id} -> post/(.+)
@@ -121,6 +122,7 @@ class Route
         // Thay thế tất cả các kí tự / bằng ký tự \/ (regex) trong URL.
         $url = str_replace('/', '\/', $url);
 
+
         // Tạo một route mới
         $route = [
             'url' => $url,
@@ -128,7 +130,8 @@ class Route
             'method' => $method,
             'action' => is_callable($action) ? $action : static::$prefix . $action,
             'params' => $params[2],
-            'middleware' => static::$middleware
+            'middleware' => static::$middleware,
+            'prefix' => static::$prefix
         ];
 
         // Thêm route vào router.
@@ -140,15 +143,17 @@ class Route
     {
         // Lặp qua các route trong ứng dụng, kiểm tra có chứa url được gọi không
         foreach (self::$routes as $route) {
+
             // nếu route có $method
             if ($route['method'] == $method) {
 
                 // kiểm tra route hiện tại có phải là url đang được gọi.
                 $reg = '/^' . $route['url'] . '$/';
-
-
                 if (preg_match($reg, $url, $params)) {
                     array_shift($params);
+                    if ($route['middleware']) {
+                        Middleware::check($route['middleware']);
+                    }
                     self::call_action_route($route['action'], $params);
                     return;
                 }
@@ -171,7 +176,7 @@ class Route
      * @return void
      *
      */
-    private function call_action_route($action, $params)
+    private static function call_action_route($action, $params)
     {
         // Nếu $action là một callback (một hàm).
         if (is_callable($action)) {

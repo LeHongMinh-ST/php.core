@@ -4,7 +4,6 @@
 namespace App\Core;
 
 use PDO;
-use PDOException;
 
 class Connection
 {
@@ -19,14 +18,31 @@ class Connection
         $this->conn->exec("set names utf8");
     }
 
-    public function getData($query){
+    public function commit()
+    {
+        $this->conn->commit();
+    }
+
+    public function rollback()
+    {
+        $this->conn->rollBack();
+    }
+
+    public function beginTransaction()
+    {
+        $this->conn->beginTransaction();
+    }
+
+    public function getData($query)
+    {
         $result = $this->conn->query($query);
         $result->setFetchMode($this->mode);
         $result->execute();
         return $result;
     }
 
-    public function query($query){
+    public function query($query)
+    {
         $result = $this->conn->prepare($query);
         return $result->execute();
     }
