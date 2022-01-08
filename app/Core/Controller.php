@@ -16,7 +16,7 @@ class Controller
     public function views($views, $data = [])
     {
         extract($data);
-        require_once "./app/Views/" . $views . ".php";
+        require_once "./app/resource/views/" . $views . ".php";
     }
 
     public function redirect($path)

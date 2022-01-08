@@ -16,6 +16,7 @@ Route::middleware('auth',function () {
 });
 
 Route::get('/home/test', 'UserController@index', 'home');
+Route::get('/create/{id}', 'UserController@create', 'create');
 Route::get('/about', function () {
     echo "Xin chào Lê Hồng Minh about";
 },'about');

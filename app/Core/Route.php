@@ -150,11 +150,16 @@ class Route
                 // kiểm tra route hiện tại có phải là url đang được gọi.
                 $reg = '/^' . $route['url'] . '$/';
                 if (preg_match($reg, $url, $params)) {
+                    $arrayParams = [];
                     array_shift($params);
+                    $arrayParams[] = new Request();
+                    foreach ($params as $param) {
+                        $arrayParams[] = $param;
+                    }
                     if ($route['middleware']) {
                         Middleware::check($route['middleware']);
                     }
-                    self::call_action_route($route['action'], $params);
+                    self::call_action_route($route['action'], $arrayParams);
                     return;
                 }
             }
